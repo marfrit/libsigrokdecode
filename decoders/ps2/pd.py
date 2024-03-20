@@ -61,16 +61,19 @@ class Decoder(srd.Decoder):
         ('ack', 'Acknowledge'),
         ('nack', 'Not Acknowledge'),
         ('req', 'Host request to send'),
-        ('start-bit', 'Start bit'),
-        ('word', 'Word'),
-        ('parity-ok', 'Parity OK bit'),
-        ('parity-err', 'Parity error bit'),
-        ('stop-bit', 'Stop bit'),
+        ('hstart-bit', 'Start bit'),
+        ('hword', 'Word'),
+        ('hparity-ok', 'Parity OK bit'),
+        ('hparity-err', 'Parity error bit'),
+        ('hstop-bit', 'Stop bit'),
     )
     annotation_rows = (
         ('bits', 'Bits', (0,)),
         ('fields', 'Device', (1,2,3,4,5,6,7,)),
         ('host', 'Host', (8,9,10,11,12,13)),
+    )
+    options = (
+        {'id': 'skip_ms', 'desc': 'Skip ms startup', 'default': 1000},
     )
 
     def __init__(self):
@@ -156,6 +159,7 @@ class Decoder(srd.Decoder):
 
 
     def decode(self):
+        self.wait({'skip': round((self.options['skip_ms']/1000) * self.samplerate)})
         if self.samplerate:
             self.max_period = int(self.samplerate / self.min_clk_hz)+1
         else:
